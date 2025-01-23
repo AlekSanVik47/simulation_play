@@ -1,7 +1,7 @@
 package org.game.entity;
 
-public abstract class SimulationWorld {
-    private Location location;
+public abstract class Essence {
+    public Location location;
     private char symbol;
     public Location getLocation() {
         return location;
@@ -19,7 +19,7 @@ public abstract class SimulationWorld {
         this.location = location;
     }
 
-    public SimulationWorld(Location location, char simbol) {
+    public Essence(Location location, char simbol) {
         this.location = location;
         this.symbol = simbol;
     }

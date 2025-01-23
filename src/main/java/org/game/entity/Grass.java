@@ -1,6 +1,6 @@
 package org.game.entity;
 
-public class Grass extends SimulationWorld{
+public class Grass extends Essence {
     private  int grassEnergy; //количество энергии травы
 
     public Grass(Location location, char symbol) {
