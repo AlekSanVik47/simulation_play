@@ -3,10 +3,9 @@ package org.game.entity;
 public class Grass extends Essence {
     private  int grassEnergy; //количество энергии травы
 
-    public Grass(Location location, char symbol) {
-        super(location, symbol);
+    public Grass(Symbol symbol, Location location) {
+        super(symbol, location);
     }
-
     public int getGrassEnergy() {
         return grassEnergy;
     }

@@ -2,25 +2,22 @@ package org.game.entity;
 
 public abstract class Essence {
     public Location location;
-    private char symbol;
+    private final Symbol symbol;
+
+    public Essence(Symbol symbol, Location location) {
+        this.symbol = symbol;
+        this.location = location;
+    }
+
     public Location getLocation() {
         return location;
-    }
-
-    public char getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(char symbol) {
-        this.symbol = symbol;
     }
 
     public void setLocation(Location location) {
         this.location = location;
     }
 
-    public Essence(Location location, char simbol) {
-        this.location = location;
-        this.symbol = simbol;
+    public Symbol getSymbol() {
+        return symbol;
     }
 }
