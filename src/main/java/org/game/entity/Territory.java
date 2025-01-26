@@ -5,6 +5,7 @@ import org.game.animals.Herbivore;
 import org.game.animals.Predator;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class Territory {
@@ -35,7 +36,7 @@ public class Territory {
             T essence = factory.create(symbol, location);
             territoryMap.put(location, essence);
             setLocation(location, essence);
-            System.out.println(location.getX() + " " + location.getY() + " " + symbol.getSymbol());
+      //      System.out.println(location.getX() + " " + location.getY() + " " + symbol.getSymbol());
         }
     }
 
@@ -55,6 +56,10 @@ public class Territory {
         forSetupDefaultPosition(factoryPredator, Symbol.PREDATOR);
 
 
+    }
+
+    public Map<Location, Essence> getTerritoryMap() {
+        return territoryMap;
     }
 
     public static void main(String[] args) {
