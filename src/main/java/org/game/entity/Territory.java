@@ -9,91 +9,62 @@ import java.util.Random;
 
 public class Territory {
     HashMap<Location, Essence> territoryMap = new HashMap<>();
+    private final Random random = new Random();
+    private final EssenceFactory<Creature> factoryCreature = Creature::new; // создание существ
+    private final EssenceFactory<Herbivore> factoryHerbivore = Herbivore::new; // создание травоядных существ
+    private final EssenceFactory<Predator> factoryPredator = Predator::new; // создание хищных существ
+    private final EssenceFactory<Rock> factoryRock = Rock::new; // создание камней
+    private final EssenceFactory<Grass> factoryGrass = Grass::new; // создание травы (ресурсы)
+    private final EssenceFactory<Tree> factoryTree = Tree::new; // создание деревьев
 
     public void setLocation(Location location, Essence essence) {
         essence.location = location;
         territoryMap.put(location, essence);
     }
-    public <T extends Essence> void forSetupDefaultPosition(Class<T> clazz, Symbol symbol) {
-        Random random = new Random(10);
-        int countEssence = random.nextInt(10);
+
+    public <T extends Essence> void forSetupDefaultPosition(EssenceFactory<T> factory, Symbol symbol) {
+        int MAX_COUNT = 10;
+        int countEssence = random.nextInt(MAX_COUNT) + 1;
         for (int i = 0; i < countEssence; i++) {
             Location location;
             do {
-                location = new Location(random.nextInt(10), random.nextInt(10));
+                location = new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT));
             }
             while (territoryMap.containsKey(location));
-            try {
-                T essence = clazz.getDeclaredConstructor(Symbol.class, Location.class).newInstance(symbol, location);
-                territoryMap.put(location, essence);
-                setLocation(location, essence);
-                System.out.println(location.getX() + " " + location.getY() + " " + symbol.getSymbol());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            T essence = factory.create(symbol, location);
+            territoryMap.put(location, essence);
+            setLocation(location, essence);
+            System.out.println(location.getX() + " " + location.getY() + " " + symbol.getSymbol());
         }
-        countEssence = random.nextInt(10);
     }
 
 
     public void setupDefaultEssencePosition() {
-        Random random = new Random(10);
-        int countEssence = random.nextInt(10);
-
-        // Добавляем камни
-        for (int i = 0; i < countEssence; i++) {
-            Location location;
-            do {
-                location = new Location(random.nextInt(10), random.nextInt(10));
-            }
-            while (territoryMap.containsKey(location));
-                Rock rock = new Rock(Symbol.ROCK, location);
-                territoryMap.put(location, rock);
-                setLocation(location, rock);
-                System.out.println(location.getX() + " " + location.getY() + " " + Symbol.ROCK.getSymbol());
-
-        }
-        countEssence = random.nextInt(10);
-
+        //               Добавляем камни
+        forSetupDefaultPosition(factoryRock, Symbol.ROCK);
         //               Добавляем существ
-        for (int j = 0; j < countEssence; j++) {
-            Location location;
-            do {
-                location = new Location(random.nextInt(10), random.nextInt(10));
-            }
-            while (territoryMap.containsKey(location));
-                Creature creature = new Creature(Symbol.CREATURE, new Location(random.nextInt(10), random.nextInt(10)));
-                setLocation(location, creature);
-                territoryMap.put(location, creature);
-                System.out.println(location.getX() + " " + location.getY() + " " + Symbol.CREATURE.getSymbol());
-
-        }
-        countEssence = random.nextInt(15);
-
-//               Добавляем деревья
-        for (int k = 0; k < countEssence; k++) {
-            Location location;
-            do {
-                location = new Location(random.nextInt(10), random.nextInt(10));
-            }
-            while (territoryMap.containsKey(location));
-            Creature creature = new Creature(Symbol.TREE, new Location(random.nextInt(10), random.nextInt(10)));
-            setLocation(location, creature);
-            territoryMap.put(location, creature);
-            System.out.println(location.getX() + " " + location.getY() + " " + Symbol.TREE.getSymbol());
-        }
+        forSetupDefaultPosition(factoryCreature, Symbol.CREATURE);
+        //               Добавляем деревья
+        forSetupDefaultPosition(factoryGrass, Symbol.GRASS);
+        //               Добавляем травы
+        forSetupDefaultPosition(factoryTree, Symbol.TREE);
+        //               Добавляем травоядных существ
+        forSetupDefaultPosition(factoryHerbivore, Symbol.HERBIVORE);
+        //               Добавляем хищных существ
+        forSetupDefaultPosition(factoryPredator, Symbol.PREDATOR);
 
 
-                }
+    }
+
     public static void main(String[] args) {
         Territory territory = new Territory();
         territory.setupDefaultEssencePosition();
 
-        territory.forSetupDefaultPosition(Herbivore.class, Symbol.HERBIVORE);
-        territory.forSetupDefaultPosition(Predator.class, Symbol.PREDATOR);
     }
 
-            }
+
+}
 
 
 
