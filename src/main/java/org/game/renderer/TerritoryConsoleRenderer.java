@@ -17,13 +17,13 @@ public class TerritoryConsoleRenderer {
         // Печатаем заголовок с номерами столбцов
         System.out.print("      "); // Отступ для номера столбца
         for (int i = 1; i <= 10; i++) {
-            System.out.print(String.format("%-6d", i)); // Форматируем номера столбцов
+            System.out.printf("%-6d", i); // Форматируем номера столбцов
         }
         System.out.println();
 
         for (int y = 0; y < 10; y++) {
             // Печатаем номер строки с отступами
-            System.out.print(String.format("%-3d", (y + 1))); // Номера строк от 1 до 10
+            System.out.printf("%-3d", (y + 1)); // Номера строк от 1 до 10
 
             for (int x = 0; x < 10; x++) {
                 Location location = new Location(x, y);

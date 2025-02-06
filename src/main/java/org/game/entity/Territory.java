@@ -40,6 +40,25 @@ public class Territory {
         }
     }
 
+    /**
+     *
+     * @param essence  проверяемая сущность
+     * @return возвращаем true если квадрат пуст
+     * @param <T> любая сущность
+     */
+    public <T extends Essence> boolean isSquareEmpty(T essence) {
+        return !territoryMap.containsKey(essence.getLocation());
+    }
+
+    /**
+     *
+     * @param essence проверяемая сущность
+     * @return возвращаем true если квадрат содержит траву
+     * @param <T> любая сущность
+     */
+    public <T extends Essence> boolean containsGrass(T essence) {
+        return territoryMap.containsKey(essence.getLocation());
+    }
 
     public void setupDefaultEssencePosition() {
         //               Добавляем камни
@@ -67,6 +86,7 @@ public class Territory {
         territory.setupDefaultEssencePosition();
 
     }
+
 
 
 }
