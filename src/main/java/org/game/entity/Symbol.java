@@ -1,18 +1,19 @@
 package org.game.entity;
 
 public enum Symbol {
-    CREATURE('C'),
-    HERBIVORE('H'),
-    PREDATOR('P'),
-    GRASS('G'),
-    TREE('T'),
-    ROCK('R');
+    CREATURE("🐉"), // Иконка для существа
+    HERBIVORE("🐑"), // Иконка для травоядного
+    PREDATOR("🐅"), // иконка для хищного
+    GRASS("🌱"), // Иконка для травы
+    TREE("🌳"), // Иконка для дерева
+    ROCK("🪨_"); // Иконка для камня
 
-    private final char symbol;
-    Symbol(char symbol) {
+
+    private final String symbol;
+    Symbol(String symbol) {
         this.symbol = symbol;
     }
-    public char getSymbol() {
+    public String getSymbol() {
         return symbol;
     }
 
