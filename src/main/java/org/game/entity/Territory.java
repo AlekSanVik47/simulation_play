@@ -81,14 +81,6 @@ public class Territory {
         return territoryMap;
     }
 
-    public static void main(String[] args) {
-        Territory territory = new Territory();
-        territory.setupDefaultEssencePosition();
-
-    }
-
-
-
 }
 
 

@@ -43,13 +43,5 @@ public class TerritoryConsoleRenderer {
         System.out.println(); // Дополнительная пустая строка в конце
     }
 
-
-    public static void main(String[] args) {
-        Territory territory = new Territory();
-        territory.setupDefaultEssencePosition();
-
-        TerritoryConsoleRenderer renderer = new TerritoryConsoleRenderer();
-        renderer.render(territory); // Отображаем карту
-    }
 }
 
