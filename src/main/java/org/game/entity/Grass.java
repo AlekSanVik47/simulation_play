@@ -1,11 +1,19 @@
 package org.game.entity;
 
-public class Grass extends Essence {
+import java.util.Set;
+
+public class Grass extends Essence implements EssenceFactory<Grass>{
     private  int grassEnergy; //количество энергии травы
 
     public Grass(Symbol symbol, Location location) {
         super(symbol, location);
     }
+
+    @Override
+    protected Set<LocationTransitions> getEssenceTransitions() {
+        return Set.of();
+    }
+
     public int getGrassEnergy() {
         return grassEnergy;
     }
@@ -14,4 +22,8 @@ public class Grass extends Essence {
         this.grassEnergy = grassEnergy;
     }
 
+    @Override
+    public Grass create(Symbol symbol, Location location) {
+        return new Grass(symbol, location);
+    }
 }

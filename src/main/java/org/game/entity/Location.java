@@ -1,6 +1,7 @@
 package org.game.entity;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class Location {
     private int x;
@@ -47,5 +48,12 @@ public class Location {
     public Location(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public boolean isFree(Set<Location> occupiedLocations) {
+        return !occupiedLocations.contains(this);
+    }
+ {
+
     }
 }
