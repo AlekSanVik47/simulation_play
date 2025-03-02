@@ -1,10 +1,21 @@
 package org.game.entity;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class Location {
     private int x;
     private int y;
+
+    public Location transition(LocationTransitions locationTransitions) {
+        return new Location(x + locationTransitions.getTransitionX(), y + locationTransitions.getTransitionY());
+    }
+
+    public boolean isTransitable(LocationTransitions locationTransitions) {
+        int newX = x + locationTransitions.getTransitionX();
+        int newY = y + locationTransitions.getTransitionY();
+        return newX > 0 && newY > 0 && newX < 10 && newY < 10;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -37,5 +48,12 @@ public class Location {
     public Location(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public boolean isFree(Set<Location> occupiedLocations) {
+        return !occupiedLocations.contains(this);
+    }
+ {
+
     }
 }

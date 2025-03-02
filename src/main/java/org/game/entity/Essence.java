@@ -1,5 +1,7 @@
 package org.game.entity;
 
+import java.util.Set;
+
 public abstract class Essence {
     public Location location;
     private final Symbol symbol;
@@ -20,4 +22,7 @@ public abstract class Essence {
     public Symbol getSymbol() {
         return symbol;
     }
+
+    protected abstract Set<LocationTransitions> getEssenceTransitions();
+
 }

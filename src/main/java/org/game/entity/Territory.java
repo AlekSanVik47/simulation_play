@@ -1,59 +1,85 @@
 package org.game.entity;
 
-import org.game.animals.Creature;
 import org.game.animals.Herbivore;
 import org.game.animals.Predator;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Territory {
+    private int MAX_COUNT = 10;
     HashMap<Location, Essence> territoryMap = new HashMap<>();
+    private final Set<Location> occupiedLocations = new HashSet<>();
+
+    public void addOccupiedLocation(Location location) {
+        occupiedLocations.add(location);
+    }
+
+
     private final Random random = new Random();
-    private final EssenceFactory<Creature> factoryCreature = Creature::new; // создание существ
-    private final EssenceFactory<Herbivore> factoryHerbivore = Herbivore::new; // создание травоядных существ
-    private final EssenceFactory<Predator> factoryPredator = Predator::new; // создание хищных существ
-    private final EssenceFactory<Rock> factoryRock = Rock::new; // создание камней
-    private final EssenceFactory<Grass> factoryGrass = Grass::new; // создание травы (ресурсы)
-    private final EssenceFactory<Tree> factoryTree = Tree::new; // создание деревьев
+    private final Herbivore factoryHerbivore = new Herbivore(Symbol.HERBIVORE, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание травоядных существ
+    private final Predator factoryPredator = new Predator(Symbol.PREDATOR, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание хищных существ
+    private final Rock factoryRock = new Rock(Symbol.ROCK, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание камней
+    private final Grass factoryGrass = new Grass(Symbol.GRASS, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание травы (ресурсы)
+    private final Tree factoryTree = new Tree(Symbol.GRASS, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание деревьев
 
     public void setLocation(Location location, Essence essence) {
         essence.location = location;
         territoryMap.put(location, essence);
     }
 
-    public <T extends Essence> void forSetupDefaultPosition(EssenceFactory<T> factory, Symbol symbol) {
-        int MAX_COUNT = 10;
+    public <T extends Essence> void forSetupDefaultPosition(EssenceFactory<T> factory, Symbol symbol, Set<Location> occupiedLocations) {
+
         int countEssence = random.nextInt(MAX_COUNT) + 1;
         for (int i = 0; i < countEssence; i++) {
             Location location;
             do {
                 location = new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT));
             }
-            while (territoryMap.containsKey(location));
 
+            while (territoryMap.containsKey(location));
             T essence = factory.create(symbol, location);
-            territoryMap.put(location, essence);
+            Set<Location> possibleCells = getPossibleCellsForMove(essence);
+            for (Location loc : possibleCells) {
+                if (loc.equals(location) && location.isFree(occupiedLocations)) {
+                    territoryMap.put(loc, essence);
+                    break;
+                }
+
+            }
             setLocation(location, essence);
-      //      System.out.println(location.getX() + " " + location.getY() + " " + symbol.getSymbol());
         }
     }
 
 
+    /**
+     * @param essence проверяемая сущность
+     * @param <T>     любая сущность
+     * @return возвращаем true если квадрат пуст
+     */
+    public <T extends Essence> boolean isSquareEmpty(T essence) {
+        return !territoryMap.containsKey(essence.getLocation());
+    }
+
+    /**
+     * @param essence проверяемая сущность
+     * @param <T>     любая сущность
+     * @return возвращаем true если квадрат содержит траву
+     */
+    public <T extends Essence> boolean containsGrass(T essence) {
+        return territoryMap.containsKey(essence.getLocation());
+    }
+
     public void setupDefaultEssencePosition() {
         //               Добавляем камни
-        forSetupDefaultPosition(factoryRock, Symbol.ROCK);
-        //               Добавляем существ
-        forSetupDefaultPosition(factoryCreature, Symbol.CREATURE);
+        forSetupDefaultPosition(factoryRock, Symbol.ROCK, occupiedLocations);
         //               Добавляем деревья
-        forSetupDefaultPosition(factoryGrass, Symbol.GRASS);
+        forSetupDefaultPosition(factoryGrass, Symbol.GRASS, occupiedLocations);
         //               Добавляем травы
-        forSetupDefaultPosition(factoryTree, Symbol.TREE);
+        forSetupDefaultPosition(factoryTree, Symbol.TREE, occupiedLocations);
         //               Добавляем травоядных существ
-        forSetupDefaultPosition(factoryHerbivore, Symbol.HERBIVORE);
+        forSetupDefaultPosition(factoryHerbivore, Symbol.HERBIVORE, occupiedLocations);
         //               Добавляем хищных существ
-        forSetupDefaultPosition(factoryPredator, Symbol.PREDATOR);
+        forSetupDefaultPosition(factoryPredator, Symbol.PREDATOR, occupiedLocations);
 
 
     }
@@ -62,12 +88,43 @@ public class Territory {
         return territoryMap;
     }
 
-    public static void main(String[] args) {
-        Territory territory = new Territory();
-        territory.setupDefaultEssencePosition();
-
+    public int getSizeTerritory() {
+        return territoryMap.size();
     }
 
+    /**
+     * Проверяем наличие пустого квадрата
+     *
+     * @param essence проверяемая сущность
+     * @param <T>     любая сущность
+     * @return если камень или дерево возвращаем false, иначе если квадрат пустой или содержит траву, возвращаем true, иначе false
+     */
+    <T extends Essence> boolean isAvailableSquare(T essence) {
+        return switch (essence.getSymbol()) {
+            case ROCK, TREE -> false;
+            default -> isSquareEmpty(essence) || !containsGrass(essence);
+        };
+    }
+
+    /**
+     * Получаем возможные клетки для перемещения
+     *
+     * @param essence проверяемая сущность
+     * @return possibleCells множество возможных клеток
+     */
+    public <T extends Essence> Set<Location> getPossibleCellsForMove(T essence) {
+        Set<Location> possibleCells = new HashSet<>();
+        for (LocationTransitions transitions : essence.getEssenceTransitions()) {
+            if (essence.location.isTransitable(transitions)) {
+                Location newLocation = essence.location.transition(transitions);
+                if (isAvailableSquare(essence)) {
+                    possibleCells.add(newLocation);
+                }
+            }
+
+        }
+        return possibleCells;
+    }
 
 }
 
