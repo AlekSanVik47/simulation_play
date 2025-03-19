@@ -1,6 +1,6 @@
-package org.game.animals;
+package org.game.entity.animals;
 
-import org.game.entity.Essence;
+import org.game.entity.Entity;
 import org.game.entity.Location;
 import org.game.entity.LocationTransitions;
 import org.game.entity.Symbol;
@@ -8,7 +8,7 @@ import org.game.entity.Symbol;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class Creature extends Essence {
+public abstract class Creature extends Entity {
     public int countsSteps;
     public int strength;
 
@@ -17,7 +17,7 @@ public abstract class Creature extends Essence {
     }
 
     @Override
-    protected Set<LocationTransitions> getEssenceTransitions() {
+    public Set<LocationTransitions> getEssenceTransitions() {
         Set<LocationTransitions> result = new HashSet<>();
         for (int i = 0; i < countsSteps; i++) {
             result.add(new LocationTransitions(i, i));

@@ -1,8 +1,10 @@
-package org.game.entity;
+package org.game.entity.immovableEntities;
+
+import org.game.entity.*;
 
 import java.util.Set;
 
-public class Tree extends Essence implements EssenceFactory<Tree>{
+public class Tree extends Entity implements EntityFactory<Tree> {
 
     public Tree(Symbol symbol, Location location) {
         super(symbol, location);

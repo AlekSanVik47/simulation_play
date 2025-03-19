@@ -1,11 +1,12 @@
-package org.game.animals;
+package org.game.entity.animals;
 
-import org.game.entity.EssenceFactory;
+import org.game.entity.EntityFactory;
 import org.game.entity.Location;
 import org.game.entity.Symbol;
 
-public class Herbivore extends Creature implements EssenceFactory<Herbivore> {
-   private final int STEPS_HERBIVORE = 3;
+public class Herbivore extends Creature implements EntityFactory<Herbivore> {
+    private final int STEPS_HERBIVORE = 3;
+
     public Herbivore(Symbol symbol, Location location) {
         super(symbol, location);
         this.countsSteps = STEPS_HERBIVORE; // Устанавливаем количество шагов {
@@ -15,7 +16,6 @@ public class Herbivore extends Creature implements EssenceFactory<Herbivore> {
     public void makeMove(int countSteps) {
 
     }
-
 
     public int getCountsSteps() {
         return countsSteps;

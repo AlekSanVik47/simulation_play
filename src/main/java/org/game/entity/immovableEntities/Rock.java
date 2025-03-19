@@ -1,8 +1,10 @@
-package org.game.entity;
+package org.game.entity.immovableEntities;
+
+import org.game.entity.*;
 
 import java.util.Set;
 
-public class Rock extends Essence implements EssenceFactory<Rock> {
+public class Rock extends Entity implements EntityFactory<Rock> {
 
     public Rock(Symbol symbol, Location location) {
         super(symbol, location);

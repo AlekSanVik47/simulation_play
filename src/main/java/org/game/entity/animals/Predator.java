@@ -1,10 +1,10 @@
-package org.game.animals;
+package org.game.entity.animals;
 
-import org.game.entity.EssenceFactory;
+import org.game.entity.EntityFactory;
 import org.game.entity.Location;
 import org.game.entity.Symbol;
 
-public class Predator extends Creature implements EssenceFactory<Predator> {
+public class Predator extends Creature implements EntityFactory<Predator> {
     private final int STEPS_PREDATOR = 5;
     public Predator(Symbol symbol, Location location) {
         super(symbol, location);

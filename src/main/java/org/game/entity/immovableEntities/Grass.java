@@ -1,9 +1,11 @@
-package org.game.entity;
+package org.game.entity.immovableEntities;
+
+import org.game.entity.*;
 
 import java.util.Set;
 
-public class Grass extends Essence implements EssenceFactory<Grass>{
-    private  int grassEnergy; //количество энергии травы
+public class Grass extends Entity implements EntityFactory<Grass> {
+    private int grassEnergy; //количество энергии травы
 
     public Grass(Symbol symbol, Location location) {
         super(symbol, location);

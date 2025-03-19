@@ -2,11 +2,11 @@ package org.game.entity;
 
 import java.util.Set;
 
-public abstract class Essence {
+public abstract class Entity {
     public Location location;
     private final Symbol symbol;
 
-    public Essence(Symbol symbol, Location location) {
+    public Entity(Symbol symbol, Location location) {
         this.symbol = symbol;
         this.location = location;
     }
