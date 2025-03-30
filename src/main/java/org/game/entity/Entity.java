@@ -23,6 +23,7 @@ public abstract class Entity {
         return symbol;
     }
 
-    protected abstract Set<LocationTransitions> getEssenceTransitions();
+    protected abstract Set<LocationTransitions> getTransitions();
 
+    public abstract Location move(Set<Location> possibleCellsForMove);
 }

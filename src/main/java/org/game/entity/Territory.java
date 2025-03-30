@@ -8,8 +8,9 @@ import org.game.entity.immovableEntities.Rock;
 import org.game.entity.immovableEntities.Tree;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class Territory implements Actions{
+public class Territory implements Actions {
     private int MAX_COUNT = 10;
     HashMap<Location, Entity> territoryMap = new HashMap<>();
     private final Set<Location> occupiedLocations = new HashSet<>();
@@ -32,11 +33,12 @@ public class Territory implements Actions{
     }
 
     /**
-     *  Размещаем сущности на карте
-     * @param factory фабрика для создания сущностей
-     * @param symbol символ сущности
+     * Размещаем сущности на карте
+     *
+     * @param factory           фабрика для создания сущностей
+     * @param symbol            символ сущности
      * @param occupiedLocations занятые клетки
-     * @param <T> сущность для дефолтного размещения
+     * @param <T>               сущность для дефолтного размещения
      */
     public <T extends Entity> void forSetupDefaultPosition(EntityFactory<T> factory, Symbol symbol, Set<Location> occupiedLocations) {
         int countEssence = random.nextInt(MAX_COUNT) + 1;
@@ -61,7 +63,7 @@ public class Territory implements Actions{
                     territoryMap.put(loc, entity);
                     break;
                 }
-        }
+            }
             setLocation(location, entity);
         }
     }
@@ -70,18 +72,9 @@ public class Territory implements Actions{
     /**
      * @return возвращаем true если квадрат пуст
      */
-    public boolean isSquareEmpty(Entity entity) {
-        return !territoryMap.containsKey(entity.getLocation());
+    public boolean isSquareEmpty(Location location) {
+        return territoryMap.get(location) == null;
     }
-
-    /**
-     * @param grass трава
-     * @return возвращаем true если квадрат содержит траву
-     */
-    public boolean isContainsGrass(Grass grass) {
-        return territoryMap.containsKey(grass.getLocation());
-    }
-
 
 
     public void setupDefaultEssencePosition() {
@@ -117,56 +110,59 @@ public class Territory implements Actions{
         if (entity == null) {
             return true;
         }
-            switch (entity.getSymbol()) {
-                case ROCK, TREE -> {
-                    return false;
-                }
-                case GRASS -> {
+        switch (entity.getSymbol()) {
+            case ROCK, TREE -> {
+                return false;
+            }
+            case GRASS -> {
+                return true;
+            }
+            default -> {
+                if (isSquareEmpty(location)) {
                     return true;
                 }
-                default -> {
-                    if (isSquareEmpty(entity)) {
-                        return true;
-                    }
-                }
             }
+        }
         return false;
     }
 
     /**
      * Получаем возможные клетки для перемещения
      *
-     * @param creature проверяемая сущность
      * @return possibleCells множество возможных клеток
      */
-    public Set<Location> getPossibleCellsForMove(Creature creature) {
+    public Set<Location> getPossibleCellsForMove() {
         Set<Location> possibleCells = new HashSet<>();
-        for (LocationTransitions transitions : creature.getEssenceTransitions()) {
-            if (creature.location.isTransitable(transitions)) {
-                Location newLocation = creature.location.transition(transitions);
-                if (isAvailableSquare(newLocation)) {
-                    possibleCells.add(newLocation);
-                }
-            }
-
+        for (int i = 0; i < MAX_COUNT; i++) {
+            possibleCells.add(new Location(i, i));
+            possibleCells.add(new Location(i, MAX_COUNT - i));
+            possibleCells.add(new Location(MAX_COUNT - i, i));
+            possibleCells.add(new Location(MAX_COUNT - i, MAX_COUNT - i));
+            possibleCells.add(new Location(MAX_COUNT - i, MAX_COUNT - i));
         }
+        possibleCells = possibleCells.stream()
+                .filter(this::isAvailableSquare)
+                .collect(Collectors.toSet());
+
+
         return possibleCells;
     }
 
     /**
      * Получаем возможные клетки для размещения
+     *
      * @param entity сущность
      * @return получаем множество для размещения
      */
-    public Set<Location> getPlacementEntities (Entity entity) {
+    public Set<Location> getPlacementEntities(Entity entity) {
         Set<Location> possibleCells = new HashSet<>();
         for (Location location : territoryMap.keySet()) {
-            if(entity.getSymbol().equals(Symbol.HERBIVORE) || entity.getSymbol().equals(Symbol.PREDATOR)) {
+            if (entity.getSymbol().equals(Symbol.HERBIVORE) || entity.getSymbol().equals(Symbol.PREDATOR)) {
                 if (isAvailableSquare(location)) {
                     possibleCells.add(location);
                 }
             } else {
-                if (isSquareEmpty(entity)){
+                if (isSquareEmpty(location)) {
                     possibleCells.add(location);
                 }
             }
@@ -183,7 +179,51 @@ public class Territory implements Actions{
     public void turnActions() {
 
     }
+
+    /**
+     * Получаем размещенные на территории сущности HERBIVORE и PREDATOR
+     *
+     * @return список сущностей HERBIVORE и PREDATOR
+     */
+    public List<Entity> getEntitiesByType() {
+        List<Entity> entities = new ArrayList<>();
+
+        for (Entity entity : territoryMap.values()) {
+            if (entity.getSymbol() == Symbol.HERBIVORE || entity.getSymbol() == Symbol.PREDATOR) {
+                entities.add(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    public void removeEntity(Entity entity) {
+        territoryMap.remove(entity.getLocation());
+    }
+
+    public void addEntity(Grass grass) {
+        territoryMap.put(grass.getLocation(), grass);
+    }
+
+    public void addEntity(Rock rock) {
+        territoryMap.put(rock.getLocation(), rock);
+    }
+
+    public void addEntity(Tree tree) {
+        territoryMap.put(tree.getLocation(), tree);
+    }
+
+    public Entity getEntityAtLocation(Location newLocation) {
+        return territoryMap.get(newLocation);
+    }
+
+    public void moveEntity(Creature creature, Location newLocation) {
+        territoryMap.put(newLocation, creature);
+        territoryMap.remove(creature.getLocation());
+    }
 }
+
+
 
 
 

@@ -11,8 +11,13 @@ public class Tree extends Entity implements EntityFactory<Tree> {
     }
 
     @Override
-    protected Set<LocationTransitions> getEssenceTransitions() {
+    protected Set<LocationTransitions> getTransitions() {
         return Set.of();
+    }
+
+    @Override
+    public Location move(Set<Location> possibleCellsForMove) {
+        return null;
     }
 
     @Override

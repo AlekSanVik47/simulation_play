@@ -10,10 +10,14 @@ public class Rock extends Entity implements EntityFactory<Rock> {
         super(symbol, location);
     }
 
+    @Override
+    protected Set<LocationTransitions> getTransitions() {
+        return Set.of();
+    }
 
     @Override
-    protected Set<LocationTransitions> getEssenceTransitions() {
-        return Set.of();
+    public Location move(Set<Location> possibleCellsForMove) {
+        return null;
     }
 
     @Override
