@@ -1,18 +1,23 @@
 package org.game.entity;
 
-import org.game.animals.Herbivore;
-import org.game.animals.Predator;
+import org.game.entity.animals.Creature;
+import org.game.entity.animals.Herbivore;
+import org.game.entity.animals.Predator;
+import org.game.entity.immovableEntities.Grass;
+import org.game.entity.immovableEntities.Rock;
+import org.game.entity.immovableEntities.Tree;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Territory {
     private int MAX_COUNT = 10;
-    HashMap<Location, Essence> territoryMap = new HashMap<>();
+    HashMap<Location, Entity> territoryMap = new HashMap<>();
     private final Set<Location> occupiedLocations = new HashSet<>();
 
-    public void addOccupiedLocation(Location location) {
-        occupiedLocations.add(location);
-    }
+//    public void addOccupiedLocation(Location location) {
+//        occupiedLocations.add(location);
+//    }
 
 
     private final Random random = new Random();
@@ -22,52 +27,55 @@ public class Territory {
     private final Grass factoryGrass = new Grass(Symbol.GRASS, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание травы (ресурсы)
     private final Tree factoryTree = new Tree(Symbol.GRASS, new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT))); // создание деревьев
 
-    public void setLocation(Location location, Essence essence) {
-        essence.location = location;
-        territoryMap.put(location, essence);
+    public void setLocation(Location location, Entity entity) {
+        entity.location = location;
+        territoryMap.put(location, entity);
     }
 
-    public <T extends Essence> void forSetupDefaultPosition(EssenceFactory<T> factory, Symbol symbol, Set<Location> occupiedLocations) {
-
+    /**
+     * Размещаем сущности на карте
+     *
+     * @param factory           фабрика для создания сущностей
+     * @param symbol            символ сущности
+     * @param occupiedLocations занятые клетки
+     * @param <T>               сущность для дефолтного размещения
+     */
+    public <T extends Entity> void forSetupDefaultPosition(EntityFactory<T> factory, Symbol symbol, Set<Location> occupiedLocations) {
         int countEssence = random.nextInt(MAX_COUNT) + 1;
-        for (int i = 0; i < countEssence; i++) {
-            Location location;
-            do {
-                location = new Location(random.nextInt(MAX_COUNT), random.nextInt(MAX_COUNT));
+        Set<Location> possibleCells = new HashSet<>();
+        // Генерируем все возможные позиции
+        for (int x = 0; x < MAX_COUNT; x++) {
+            for (int y = 0; y < MAX_COUNT; y++) {
+                Location loc = new Location(x, y);
+                if (!territoryMap.containsKey(loc) && loc.isFree(occupiedLocations)) {
+                    possibleCells.add(loc);
+                }
             }
-
-            while (territoryMap.containsKey(location));
-            T essence = factory.create(symbol, location);
-            Set<Location> possibleCells = getPossibleCellsForMove(essence);
+        }
+        // Перемешиваем доступные позиции для случайного выбора
+        List<Location> shuffledCells = new ArrayList<>(possibleCells);
+        Collections.shuffle(shuffledCells);
+        for (int i = 0; i < Math.min(countEssence, shuffledCells.size()); i++) {
+            Location location = shuffledCells.get(i);
+            Entity entity = factory.create(symbol, location);
             for (Location loc : possibleCells) {
                 if (loc.equals(location) && location.isFree(occupiedLocations)) {
-                    territoryMap.put(loc, essence);
+                    territoryMap.put(loc, entity);
                     break;
                 }
-
             }
-            setLocation(location, essence);
+            setLocation(location, entity);
         }
     }
 
 
     /**
-     * @param essence проверяемая сущность
-     * @param <T>     любая сущность
      * @return возвращаем true если квадрат пуст
      */
-    public <T extends Essence> boolean isSquareEmpty(T essence) {
-        return !territoryMap.containsKey(essence.getLocation());
+    public boolean isSquareEmpty(Location location) {
+        return territoryMap.get(location) == null;
     }
 
-    /**
-     * @param essence проверяемая сущность
-     * @param <T>     любая сущность
-     * @return возвращаем true если квадрат содержит траву
-     */
-    public <T extends Essence> boolean containsGrass(T essence) {
-        return territoryMap.containsKey(essence.getLocation());
-    }
 
     public void setupDefaultEssencePosition() {
         //               Добавляем камни
@@ -84,7 +92,7 @@ public class Territory {
 
     }
 
-    public Map<Location, Essence> getTerritoryMap() {
+    public Map<Location, Entity> getTerritoryMap() {
         return territoryMap;
     }
 
@@ -95,38 +103,117 @@ public class Territory {
     /**
      * Проверяем наличие пустого квадрата
      *
-     * @param essence проверяемая сущность
-     * @param <T>     любая сущность
      * @return если камень или дерево возвращаем false, иначе если квадрат пустой или содержит траву, возвращаем true, иначе false
      */
-    <T extends Essence> boolean isAvailableSquare(T essence) {
-        return switch (essence.getSymbol()) {
-            case ROCK, TREE -> false;
-            default -> isSquareEmpty(essence) || !containsGrass(essence);
-        };
+    public boolean isAvailableSquare(Location location) {
+        Entity entity = territoryMap.get(location);
+        if (entity == null) {
+            return true;
+        }
+        switch (entity.getSymbol()) {
+            case ROCK, TREE -> {
+                return false;
+            }
+            case GRASS -> {
+                return true;
+            }
+            default -> {
+                if (isSquareEmpty(location)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
      * Получаем возможные клетки для перемещения
      *
-     * @param essence проверяемая сущность
      * @return possibleCells множество возможных клеток
      */
-    public <T extends Essence> Set<Location> getPossibleCellsForMove(T essence) {
+    public Set<Location> getPossibleCellsForMove() {
         Set<Location> possibleCells = new HashSet<>();
-        for (LocationTransitions transitions : essence.getEssenceTransitions()) {
-            if (essence.location.isTransitable(transitions)) {
-                Location newLocation = essence.location.transition(transitions);
-                if (isAvailableSquare(essence)) {
-                    possibleCells.add(newLocation);
+        for (int i = 0; i < MAX_COUNT; i++) {
+            possibleCells.add(new Location(i, i));
+            possibleCells.add(new Location(i, MAX_COUNT - i));
+            possibleCells.add(new Location(MAX_COUNT - i, i));
+            possibleCells.add(new Location(MAX_COUNT - i, MAX_COUNT - i));
+            possibleCells.add(new Location(MAX_COUNT - i, MAX_COUNT - i));
+        }
+        possibleCells = possibleCells.stream()
+                .filter(this::isAvailableSquare)
+                .collect(Collectors.toSet());
+
+
+        return possibleCells;
+    }
+
+    /**
+     * Получаем возможные клетки для размещения
+     *
+     * @param entity сущность
+     * @return получаем множество для размещения
+     */
+    public Set<Location> getPlacementEntities(Entity entity) {
+        Set<Location> possibleCells = new HashSet<>();
+        for (Location location : territoryMap.keySet()) {
+            if (entity.getSymbol().equals(Symbol.HERBIVORE) || entity.getSymbol().equals(Symbol.PREDATOR)) {
+                if (isAvailableSquare(location)) {
+                    possibleCells.add(location);
+                }
+            } else {
+                if (isSquareEmpty(location)) {
+                    possibleCells.add(location);
                 }
             }
-
         }
         return possibleCells;
     }
 
+    /**
+     * Получаем размещенные на территории сущности HERBIVORE и PREDATOR
+     *
+     * @return список сущностей HERBIVORE и PREDATOR
+     */
+    public List<Entity> getEntitiesByType() {
+        List<Entity> entities = new ArrayList<>();
+
+        for (Entity entity : territoryMap.values()) {
+            if (entity.getSymbol() == Symbol.HERBIVORE || entity.getSymbol() == Symbol.PREDATOR) {
+                entities.add(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    public void removeEntity(Entity entity) {
+        territoryMap.remove(entity.getLocation());
+    }
+
+    public void addEntity(Grass grass) {
+        territoryMap.put(grass.getLocation(), grass);
+    }
+
+    public void addEntity(Rock rock) {
+        territoryMap.put(rock.getLocation(), rock);
+    }
+
+    public void addEntity(Tree tree) {
+        territoryMap.put(tree.getLocation(), tree);
+    }
+
+    public Entity getEntityAtLocation(Location newLocation) {
+        return territoryMap.get(newLocation);
+    }
+
+    public void moveEntity(Creature creature, Location newLocation) {
+        territoryMap.put(newLocation, creature);
+        territoryMap.remove(creature.getLocation());
+    }
 }
+
+
 
 
 

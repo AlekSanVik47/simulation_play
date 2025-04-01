@@ -1,6 +1,6 @@
 package org.game.renderer;
 
-import org.game.entity.Essence;
+import org.game.entity.Entity;
 import org.game.entity.Location;
 import org.game.entity.Territory;
 
@@ -13,7 +13,7 @@ public class TerritoryConsoleRenderer {
         print(territory.getTerritoryMap());
     }
 
-    public void print(Map<Location, Essence> territoryMap) {
+    public void print(Map<Location, Entity> territoryMap) {
         // Печатаем заголовок с номерами столбцов
         System.out.print("      "); // Отступ для номера столбца
         for (int i = 1; i <= 10; i++) {
@@ -27,11 +27,11 @@ public class TerritoryConsoleRenderer {
 
             for (int x = 0; x < 10; x++) {
                 Location location = new Location(x, y);
-                Essence essence = territoryMap.get(location);
+                Entity entity = territoryMap.get(location);
 
-                if (essence != null) {
+                if (entity != null) {
                     // Печатаем ячейку с сущностью
-                    System.out.print("|__" + essence.getSymbol().getSymbol() + "_"); // Символ сущности
+                    System.out.print("|__" + entity.getSymbol().getSymbol() + "_"); // Символ сущности
                 } else {
                     // Печатаем пустую ячейку
                     System.out.print(DEFAULT);
