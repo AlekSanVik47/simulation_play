@@ -10,14 +10,14 @@ import org.game.entity.immovableEntities.Tree;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Territory implements Actions {
+public class Territory {
     private int MAX_COUNT = 10;
     HashMap<Location, Entity> territoryMap = new HashMap<>();
     private final Set<Location> occupiedLocations = new HashSet<>();
 
-    public void addOccupiedLocation(Location location) {
-        occupiedLocations.add(location);
-    }
+//    public void addOccupiedLocation(Location location) {
+//        occupiedLocations.add(location);
+//    }
 
 
     private final Random random = new Random();
@@ -168,16 +168,6 @@ public class Territory implements Actions {
             }
         }
         return possibleCells;
-    }
-
-    @Override
-    public void initActions() {
-        setupDefaultEssencePosition();
-    }
-
-    @Override
-    public void turnActions() {
-
     }
 
     /**

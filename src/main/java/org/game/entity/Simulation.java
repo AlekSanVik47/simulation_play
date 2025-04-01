@@ -12,14 +12,18 @@ import java.util.Set;
 
 public class Simulation {
 
-    private int counterMove; //счетчик ходов
-    private Actions actions;
     private TerritoryConsoleRenderer territoryConsoleRenderer;
     private Territory territory;
+    private int MAX_SIMULATIONS; // Максимальное количество симуляций
+
+    public Simulation(int maxSimulations) {
+        this.MAX_SIMULATIONS = maxSimulations;
+    }
 
     public void playSimulation() {
         System.out.println("Simulation started");
         boolean isNotFinished = true;
+        int simulationCount = 0; // Счетчик симуляций
 
         while (isNotFinished) {
             createNewTerritory(); // Создание новой территории
@@ -30,19 +34,41 @@ public class Simulation {
                 isNotFinished = false;
                 break; // Выход из цикла
             }
+
+            // Проверка на количество сущностей
+            long herbivoreCount = herbivoresAndPredators.stream()
+                    .filter(entity -> entity.getSymbol().equals(Symbol.HERBIVORE))
+                    .count();
+            long predatorCount = herbivoresAndPredators.stream()
+                    .filter(entity -> entity.getSymbol().equals(Symbol.PREDATOR))
+                    .count();
+
+            // Проверка на окончание симуляции
+            if (herbivoreCount == 0 || predatorCount == 0 || simulationCount >= MAX_SIMULATIONS) {
+                isNotFinished = false;
+                break; // Выход из цикла
+            }
+
             for (Entity entity : new ArrayList<>(herbivoresAndPredators)) {
                 if (entity.getSymbol().equals(Symbol.HERBIVORE) || entity.getSymbol().equals(Symbol.PREDATOR)) {
                     Creature creature = (Creature) entity;
                     Set<Location> possibleCellsForMove = territory.getPossibleCellsForMove(); // Проверяем наличие свободных клеток для передвижения
                     if (!possibleCellsForMove.isEmpty()) {
                         Location location = possibleCellsForMove.iterator().next();
-                        handleMovement(creature, location); // Перемещаем сущность в новую позицию) // Перемещаем сущность в новую позицию
-
+                        handleMovement(creature, location); // Перемещаем сущность в новую позицию
                     }
                 }
             }
 
+            try {
+                Thread.sleep(1000); // Задержка между ходами
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            simulationCount++; // Увеличиваем счетчик симуляций
         }
+
+        System.out.println("Simulation ended after " + simulationCount + " iterations.");
     }
 
     public void handleCreatureInteraction(Creature attacker, Creature target) {
@@ -92,26 +118,20 @@ public class Simulation {
             }
             territory.moveEntity(creature, newLocation);
         }
-            // Обрабатываем атаку хищника
+        // Обрабатываем атаку хищника
         else if (creature.getSymbol().equals(Symbol.PREDATOR)) {
-                if (targetEntity instanceof Herbivore) {
-                    handleCreatureInteraction((Predator) creature, (Herbivore) targetEntity);
-                } else {
-                    territory.moveEntity(creature, newLocation);
-                }
+            // Проверяем, есть ли цель
+            if (targetEntity != null && targetEntity.getSymbol().equals(Symbol.HERBIVORE)) {
+                handleCreatureInteraction((Predator) creature, (Herbivore) targetEntity);
+            } else {
+                territory.moveEntity(creature, newLocation);
             }
         }
-    public static void main(String[] args) {
-        Simulation simulation = new Simulation();
-        simulation.playSimulation();
     }
 
-    }
+}
 
 
 
-//    nextTurn() - просимулировать и отрендерить один ход
-//    startSimulation() - запустить бесконечный цикл симуляции и рендеринга
-//    pauseSimulation() - приостановить бесконечный цикл симуляции и рендеринга
 
 
