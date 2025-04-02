@@ -113,7 +113,7 @@ public class Simulation {
         // Обрабатываем перемещение травоядного
         if (creature.getSymbol().equals(Symbol.HERBIVORE)) {
             Herbivore herbivore = (Herbivore) creature;
-            if (targetEntity.getSymbol().equals(Symbol.GRASS)) {
+            if (targetEntity != null && targetEntity.getSymbol().equals(Symbol.GRASS)) {
                 handleHerbivoreOnGrass(herbivore, (Grass) targetEntity);
             }
             territory.moveEntity(creature, newLocation);
